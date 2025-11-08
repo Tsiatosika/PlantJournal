@@ -2,18 +2,21 @@ package com.example.bloom.ui.detail
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,8 +33,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -52,13 +60,15 @@ fun DiscoveryDetailScreen(
         topBar = {
             DetailTopAppBar(
                 onBack = { navController.popBackStack() },
+                onShare = { /* Implement share */ },
                 onDelete = { showDeleteDialog = true }
             )
-        }
+        },
+        containerColor = Color.White
     ) { paddingValues ->
         if (discovery == null) {
             Text(
-                text = "Chargement...",
+                text = "Loading...",
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
@@ -90,20 +100,32 @@ fun DiscoveryDetailScreen(
 @Composable
 fun DetailTopAppBar(
     onBack: () -> Unit,
+    onShare: () -> Unit,
     onDelete: () -> Unit
 ) {
     TopAppBar(
-        title = { Text("Détail de la Découverte") },
+        title = {
+            Text(
+                "Discovery Details",
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
         navigationIcon = {
             IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
             }
         },
         actions = {
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Supprimer")
+            IconButton(onClick = onShare) {
+                Icon(Icons.Default.Share, contentDescription = "Share")
             }
-        }
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete")
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.White
+        )
     )
 }
 
@@ -127,42 +149,55 @@ fun DiscoveryDetailContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(300.dp)
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(16.dp))
         )
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Content
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            Text(
-                text = "Détail Plante",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
+            // Plant Name
             Text(
                 text = discovery.name,
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            Card(
+            // Discovery Date
+            Text(
+                text = "Discovered: ${FileUtils.formatDetailedTimestamp(discovery.timestamp)}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+
+            // Description
+            Text(
+                text = discovery.summary,
+                style = MaterialTheme.typography.bodyLarge,
+                lineHeight = 24.sp,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
+
+            // Delete Button
+            Button(
+                onClick = onDelete,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 24.dp)
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE57373)
+                ),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Text(
-                    text = discovery.summary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(16.dp)
-                )
+                Text("Delete Entry", color = Color.White)
             }
 
-            // Metadata
-            Text(
-                text = "Découverte le ${FileUtils.formatDetailedTimestamp(discovery.timestamp)}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -174,18 +209,21 @@ fun DeleteConfirmationDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Supprimer la découverte") },
-        text = { Text("Êtes-vous sûr de vouloir supprimer cette découverte ? Cette action est irréversible.") },
+        title = { Text("Delete Discovery") },
+        text = { Text("Are you sure you want to delete this discovery? This action cannot be undone.") },
         confirmButton = {
             Button(
-                onClick = onConfirm
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE57373)
+                )
             ) {
-                Text("Supprimer")
+                Text("Delete")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Annuler")
+                Text("Cancel")
             }
         }
     )
