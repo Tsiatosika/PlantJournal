@@ -2,6 +2,7 @@ package com.example.bloom.ui.auth
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import com.example.bloom.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,9 +27,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -89,7 +89,7 @@ fun AuthScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Email, // Remplacez par votre logo leaf
+                    imageVector = Icons.Default.Email,
                     contentDescription = "Logo",
                     tint = Color.White,
                     modifier = Modifier.size(40.dp)
@@ -250,7 +250,7 @@ fun AuthScreen(
             // Google Sign In
             OutlinedButton(
                 onClick = {
-                    // Google sign in à implémenter
+                    viewModel.signInWithGoogle()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -262,10 +262,9 @@ fun AuthScreen(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Lock,
+                    painter = painterResource(id = R.drawable.ic_google),
                     contentDescription = "Google",
-                    modifier = Modifier.size(20.dp),
-                    tint = Color.Black
+                    modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text("Continue with Google", fontWeight = FontWeight.Medium)

@@ -38,7 +38,23 @@ class AuthViewModel(
         }
     }
 
-    fun signInWithGoogle(idToken: String) {
+    fun signInWithGoogle() {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            try {
+                // Ici vous devriez lancer l'intent de connexion Google
+                // et récupérer le idToken depuis l'activité
+                val idToken = "" // À récupérer depuis l'UI
+                val success = authRepository.signInWithGoogle(idToken)
+                _authState.value = if (success) AuthState.Success else AuthState.Error("Échec de la connexion Google")
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error("Erreur: ${e.message}")
+            }
+        }
+    }
+
+    // Méthode pour traiter le résultat
+    fun handleGoogleSignInResult(idToken: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             try {
